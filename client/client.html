@@ -1,0 +1,56 @@
+<template name="layout">
+	{{> header}}
+	{{yield}}
+</template>
+
+<template name="header">
+	<header>
+		{{> logo}}
+		{{> nav}}
+	</header>
+</template>
+
+<template name="home">
+	{{#if currentUser}}
+		{{> roomOptions}}
+	{{/if}}
+</template>
+
+<template name="logo">
+	<div id="logo">
+		{{> title}}
+		{{> tagline}}
+	</div>
+</template>
+
+<template name="title">
+	<h1 class="title">Multiplayer Poker</h1>
+</template>
+
+<template name="tagline">
+	<p>Poker Game for those who can't afford to go to Vegas</p>
+</template>
+
+<template name="nav">
+	<nav>
+		{{loginButtons align="right"}}
+	</nav>
+</template>
+
+<template name="roomOptions">
+	<div class="container">
+		<div class="row">
+			<form>
+				<div class="col-lg-offset-2 col-lg-6">
+					<div class="input-group input-group-lg">
+						<span class="input-group-addon">poker.meteor.com/</span>
+						<input id="room-name" class="form-control" type="text" placeholder="lobby" /> 
+					</div>
+				</div>
+				<div class="col-lg-2">
+					<input id="join-btn" type="submit" class="btn btn-default btn-lg" value="Join Room" />
+				</div>
+			</form>
+		</div>
+	</div>
+</template>

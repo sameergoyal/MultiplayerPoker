@@ -6,6 +6,11 @@ Meteor.publish('rooms', function () {
 	return Rooms.find({});
 });
 
+Meteor.publish('roomByName', function(roomName){
+	console.log('Subscribed');
+	return Rooms.find({name: roomName});
+});
+
 Rooms.allow({
 	insert: function (userId, doc) {
 		if(userId && doc.users && doc.users.length) {

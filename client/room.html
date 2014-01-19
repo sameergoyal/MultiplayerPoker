@@ -3,8 +3,12 @@
 </template>
 
 <template name="table">
-
+{{#if playable users}}
+{{else}}
+	{{> invite}}
+{{/if}}
 </template>
 
 <template name="invite">
+something
 </template>

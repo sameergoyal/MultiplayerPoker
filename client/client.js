@@ -18,6 +18,13 @@ Router.map(function () {
         data: function() {
             return Rooms.findOne({name:this.params.name});
         },
+        action: function() {
+            var playerCardHandler = function(message) { 
+                console.log('Cards dealt!');
+                console.log(message);
+            };
+            PlayerCardStream.on(Meteor.userId(), playerCardHandler);
+        },
     });
 });
 

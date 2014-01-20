@@ -1,0 +1,23 @@
+<template name="home">
+	{{#if currentUser}}
+		{{> roomOptions}}
+	{{/if}}
+</template>
+
+<template name="roomOptions">
+	<div class="container">
+		<div class="row">
+			<form>
+				<div class="col-lg-offset-2 col-lg-6">
+					<div class="input-group input-group-lg">
+						<span class="input-group-addon">poker.meteor.com/</span>
+						<input id="room-name" class="form-control" type="text" placeholder="lobby" /> 
+					</div>
+				</div>
+				<div class="col-lg-2">
+					<input id="join-btn" type="submit" class="btn btn-default btn-lg" value="Join Room" />
+				</div>
+			</form>
+		</div>
+	</div>
+</template>

@@ -18,10 +18,10 @@ Router.map(function () {
         data: function() {
             return Rooms.findOne({name:this.params.name});
         },
-        action: function() {
+        before: function() {
             var playerCardHandler = function(message) { 
                 console.log('Cards dealt!');
-                console.log(message);
+                Session.set('myCards',message);
             };
             PlayerCardStream.on(Meteor.userId(), playerCardHandler);
         },
@@ -61,4 +61,37 @@ Template.table.playable = function(users) {
         }
     }
     return false;
+}
+
+Template.table.isUserPlaying = function(users) {
+    if(users && users.length) {
+        for(var i=0,l=users.length; i<l ; i++) {
+            if(users[i] === Meteor.userId()) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+Template.table.isUserWaiting = function(users) {
+    if(users && users.length) {
+        for(var i=0,l=users.length; i<l ; i++) {
+            if(users[i] === Meteor.userId()) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+Template.table.isGameStarted = function() {
+    if(Session.get('myCards')) {
+        return true;
+    }
+    return false;
+}
+
+Template.game.cards = function() {
+    return Session.get('myCards');
 }

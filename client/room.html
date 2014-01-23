@@ -4,7 +4,19 @@
 
 <template name="table">
 {{#if playable users}}
-	loading
+	{{#if isUserPlaying users}}
+		{{#if isGameStarted}}
+			{{> game}}
+		{{else}}
+			Dealing the cards
+		{{/if}}
+	{{else}}
+		{{#if isUserWaiting queue}}
+			Wait for a game before you join the table
+		{{else}}
+			The table is full. Please try joining some other table. Go to the <a href="{{pathFor 'home'}}">lobby</a>.
+		{{/if}}
+	{{/if}}
 {{else}}
 	{{> invite}}
 {{/if}}
@@ -17,4 +29,11 @@
 		Ask them to type in {{name}} as the room name & click join or send them <a href="{{pathFor 'room'}}">this</a> link.
 		</div>
 	</div>
+</template>
+
+<template name="game">
+Your cards are : 
+{{#each cards}}
+<div class="card">{{card}}</div>
+{{/each}}
 </template>

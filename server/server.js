@@ -2,6 +2,8 @@ Accounts.config({
 	sendVerificationEmail: true,
 });
 
+var currPlayer;
+
 PlayerCardStream.permissions.read(function(eventName) {
 	return this.userId === eventName;
 });
@@ -9,6 +11,24 @@ PlayerCardStream.permissions.read(function(eventName) {
 PlayerCardStream.permissions.write(function(eventName) {
 	return false;
 });
+
+TableCardStream.permissions.read(function(eventName) {
+	return true;
+});
+
+TableCardStream.permissions.write(function(eventName) {
+	return false;
+});
+
+MovesStream.permissions.read(function(eventName) {
+	return true;
+});
+
+MovesStream.permissions.write(function(eventName) {
+	if(currPlayer === this.userId) {
+		return true;
+	}
+}, false);
 
 Meteor.publish('roomByName', function(roomName){
 	var self = this;
@@ -23,6 +43,7 @@ Meteor.publish('roomByName', function(roomName){
 	    		users: [userId],
 	    		started: false,
 	    		queue: [],
+	    		players: [],
 	    	},function(error, result){
 		        if(error) {
 		            console.log('Error is '+error);
@@ -32,18 +53,28 @@ Meteor.publish('roomByName', function(roomName){
 		    });
 	    } else {
 	    	if(room.started) {
-	    		if(room.users && room.queue && room.users.length + room.queue.length < 9) {
-		    		Rooms.update({
-				        _id: room._id,
-				    }, {
-				        $push: {queue: userId },
-				    }, function(error, result){
-				        if(error) {
-				            console.log('Error is '+error);
-				        } else if(result) {
-				            console.log(userId+' joined the room: '+roomName);
-				        }
-				    });
+	    		if(room.users && room.users.length) {
+	    			var found = false;
+	    			var users = room.users;
+		    		for(var i=0,l=users.length; i<l ; i++) {
+			            if(users[i] === userId) {
+			                found = true;
+			                break;
+			            }
+			        }
+		    		if(!found && room.queue && room.users.length + room.queue.length < 9) {
+			    		Rooms.update({
+					        _id: room._id,
+					    }, {
+					        $push: {queue: userId },
+					    }, function(error, result){
+					        if(error) {
+					            console.log('Error is '+error);
+					        } else if(result) {
+					            console.log(userId+' joined the queue in room: '+roomName);
+					        }
+					    });
+		    		}
 	    		}
 	    	} else {
 		    	if(room.users && room.users.length) {
@@ -67,7 +98,6 @@ Meteor.publish('roomByName', function(roomName){
 			            if(playable) {
 							startGame(room._id);
 						}
-						startGame(room._id);
 			        }
 			    });
 			}
@@ -79,6 +109,7 @@ Meteor.publish('roomByName', function(roomName){
 	    });
 		this.onStop(function(){
 			var user = Meteor.users.findOne(userId);
+			room = Rooms.findOne({name: roomName});
 			if(user && user.publications && user.publications.length && user.publications.length === 1) {
 				Rooms.update({
 			        name: roomName, 
@@ -89,6 +120,19 @@ Meteor.publish('roomByName', function(roomName){
 			            console.log('Error is '+error);
 			        } else if(result) {
 			            console.log(userId+' left the room: '+roomName);
+			        }
+			    });
+			}
+			if(room.players && room.players.length === 2) {
+				Rooms.update({
+			    	name: roomName, 
+			    }, {
+			    	$set: {started: false},
+			    }, function(error, result){
+			        if(error) {
+			            console.log('Error is '+error);
+			        } else if(result) {
+			            console.log('Game Stopped');
 			        }
 			    });
 			}
@@ -118,16 +162,28 @@ var startGame = function(roomId) {
 			players.push(users[i]);
 		}
 	}
+	Rooms.update({
+        _id: roomId, 
+    }, {
+        $set: {players: players },
+    }, function(error, result){
+        if(error) {
+            console.log('Error is '+error);
+        } else if(result) {
+            console.log('Game started');
+        }
+    });
 	var playerCards = {};
 	for(i=0,l=players.length; i<l ; i++) {
-		playerCards[players[i]] = [cards.pop()];
+		playerCards[players[i]] = [{card: cards.pop()}];
 	}
 	for(user in playerCards) {
 		if(playerCards.hasOwnProperty(user)) {
-			playerCards[user].push(cards.pop());
+			playerCards[user].push({card: cards.pop()});
 			PlayerCardStream.emit(user, playerCards[user]);
 		}
 	}
+	console.log(playerCards);
 	var flop = [], turn, river;
 	cards.pop();	//Burn
 	flop.push(cards.pop());
@@ -137,4 +193,8 @@ var startGame = function(roomId) {
 	turn = cards.pop();
 	cards.pop();	//Burn
 	river = cards.pop();
+	//First Round of Betting
+	for(i=0,l=players.length; i<l ; i++) {
+		//currPlayer = players[i];
+	}
 }

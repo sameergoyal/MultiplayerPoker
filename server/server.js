@@ -110,7 +110,9 @@ Meteor.publish('roomByName', function(roomName){
 		this.onStop(function(){
 			var user = Meteor.users.findOne(userId);
 			room = Rooms.findOne({name: roomName});
+			var leaving = false;
 			if(user && user.publications && user.publications.length && user.publications.length === 1) {
+				leaving = true;
 				Rooms.update({
 			        name: roomName, 
 			    }, {
@@ -123,7 +125,7 @@ Meteor.publish('roomByName', function(roomName){
 			        }
 			    });
 			}
-			if(room.players && room.players.length === 2) {
+			if(leaving && room.players && room.players.length === 2) {
 				Rooms.update({
 			    	name: roomName, 
 			    }, {

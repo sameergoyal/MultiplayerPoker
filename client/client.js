@@ -1,3 +1,7 @@
+Accounts.ui.config({
+    passwordSignupFields: 'USERNAME_AND_EMAIL',
+});
+
 Router.configure({
     layoutTemplate: 'layout'
 });
@@ -14,7 +18,7 @@ Router.map(function () {
     this.route('room',{
         path: 'room/:name',
         template: 'room',
-        waitOn: function() { Meteor.subscribe('roomByName', this.params.name) },
+        waitOn: function() { return [Meteor.subscribe('roomByName', this.params.name), Meteor.subscribe('usersByName', this.params.name)] },
         data: function() {
             return Rooms.findOne({name:this.params.name});
         },
@@ -94,4 +98,21 @@ Template.table.isGameStarted = function() {
 
 Template.game.cards = function() {
     return Session.get('myCards');
+}
+
+Template.game.playersInfo = function(players) {
+    //TODO: return more info
+    var result = [];
+    for(var i=0,l=players.length; i<l; i++) {
+        result.push({userId: players[i]});
+    }
+    return result
+}
+
+Template.game.sessionGet = function(key) {
+    return Session.get(key);
+}
+
+Template.game.chipCount = function() {
+    return Meteor.user().chips;
 }

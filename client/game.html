@@ -1,0 +1,50 @@
+<template name="game">
+<div class="container">
+	<div id="users" class="row">
+		<div id="playing" class="col-lg-offset-1 col-lg-6">
+			<span id="playingUsersMessage">Playing:</span>
+			{{#each playersInfo players}}
+				{{userId}},
+			{{/each}}
+		</div>
+		<div id="waiting" class="col-lg-offset-1 col-lg-3">
+			<span id="waitingUsersMessage">Waiting:</span>
+			{{#each playersInfo queue}}
+				{{userId}},
+			{{else}}
+				None
+			{{/each}}
+		</div>
+	</div>
+	<div id="tableCenter" class="row">
+		<div id="tableCards" class="col-lg-offset-3 col-lg-6">
+			<img src="{{#if sessionGet 'tableCard1'}}/{{sessionGet 'tableCard1'}}.png{{else}}/blue.png{{/if}}" class="tableCards" id="tableCard1" />
+			<img src="{{#if sessionGet 'tableCard2'}}/{{sessionGet 'tableCard2'}}.png{{else}}/blue.png{{/if}}" class="tableCards" id="tableCard2" />
+			<img src="{{#if sessionGet 'tableCard3'}}/{{sessionGet 'tableCard3'}}.png{{else}}/blue.png{{/if}}" class="tableCards" id="tableCard3" />
+			<img src="{{#if sessionGet 'tableCard4'}}/{{sessionGet 'tableCard4'}}.png{{else}}/blue.png{{/if}}" class="tableCards" id="tableCard4" />
+			<img src="{{#if sessionGet 'tableCard5'}}/{{sessionGet 'tableCard5'}}.png{{else}}/blue.png{{/if}}" class="tableCards" id="tableCard5" />
+		</div>
+	</div>
+	<div id="myHand" class="row">
+		<div id="myCards" class="col-lg-offset-4 col-lg-4">
+			{{#each sessionGet 'myCards'}}
+				<img src="/{{card}}.png" class="myCards" />
+			{{/each}}
+		</div>
+	</div>
+	<div id="chipCountInfo" class="row">
+		<div id="chipCount" class="col-lg-offset-5 col-lg-2">
+			<span id="chipCountMessage">Your chips: </span>
+			<span id="userChipCount">{{chipCount}}</span>
+			<span class="glyphicon glyphicon-stats"></span>
+		</div>
+	</div>
+	<div class="row" id="dashboard">
+		<div id="actions" class="btn-group btn-group-lg col-lg-offset-4 col-lg-8">
+			<button type="button" class="btn btn-default">Fold</button>
+  			<button type="button" class="btn btn-default">Check/Call</button>
+  			<button type="button" class="btn btn-default">Raise</button>
+		</div>
+	</div>
+</div>
+</template>

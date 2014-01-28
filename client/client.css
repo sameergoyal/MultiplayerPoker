@@ -37,3 +37,23 @@ p {
 #invite {
 	margin: auto;
 }
+
+#tableCenter {
+	margin-top: 20px;
+	margin-bottom: 40px;
+}
+
+#myHand {
+	margin-left: 50px;
+	margin-top: 20px;
+	margin-bottom: 10px;
+}
+
+.tableCards, .myCards {
+	margin-left: 10px;
+	margin-right: 10px;
+}
+
+#chipCountInfo {
+	margin-bottom: 20px;
+}

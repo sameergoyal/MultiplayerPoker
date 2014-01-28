@@ -1,8 +1,18 @@
+var startingChipCount = 500000;
+var maxUsers = 9;
+
 Accounts.config({
 	sendVerificationEmail: true,
 });
 
-var currPlayer;
+Accounts.onCreateUser(function(options, user) {
+	user.chips = startingChipCount;
+	if (options.profile)
+    	user.profile = options.profile;
+    return user;
+});
+
+var currPlayer = {};
 
 PlayerCardStream.permissions.read(function(eventName) {
 	return this.userId === eventName;
@@ -25,7 +35,7 @@ MovesStream.permissions.read(function(eventName) {
 });
 
 MovesStream.permissions.write(function(eventName) {
-	if(currPlayer === this.userId) {
+	if(currPlayer[eventName] === this.userId) {
 		return true;
 	}
 }, false);
@@ -54,26 +64,20 @@ Meteor.publish('roomByName', function(roomName){
 	    } else {
 	    	if(room.started) {
 	    		if(room.users && room.users.length) {
-	    			var found = false;
-	    			var users = room.users;
-		    		for(var i=0,l=users.length; i<l ; i++) {
-			            if(users[i] === userId) {
-			                found = true;
-			                break;
-			            }
-			        }
-		    		if(!found && room.queue && room.users.length + room.queue.length < 9) {
-			    		Rooms.update({
-					        _id: room._id,
-					    }, {
-					        $push: {queue: userId },
-					    }, function(error, result){
-					        if(error) {
-					            console.log('Error is '+error);
-					        } else if(result) {
-					            console.log(userId+' joined the queue in room: '+roomName);
-					        }
-					    });
+		    		if(room.users.indexOf(userId) === -1 && room.queue && room.users.length + room.queue.length <= maxUsers) {
+		    			if(users.indexOf(userId) === -1) {
+				    		Rooms.update({
+						        _id: room._id,
+						    }, {
+						        $push: {queue: userId },
+						    }, function(error, result){
+						        if(error) {
+						            console.log('Error is '+error);
+						        } else if(result) {
+						            console.log(userId+' joined the queue in room: '+roomName);
+						        }
+						    });
+			    		}
 		    		}
 	    		}
 	    	} else {
@@ -149,7 +153,7 @@ Meteor.publish('roomByName', function(roomName){
 });
 
 var startGame = function(roomId) {
-	var cards = [], suits = ['S','C','H','D'], nos = ['A','2','3','4','5','6','7','8','9','T','J','Q','K'], i, j, l, k;
+	var cards = [], suits = ['s','c','h','d'], nos = ['1','2','3','4','5','6','7','8','9','10','j','q','k'], i, j, l, k;
 	for(i=0,l=suits.length; i<l ; i++) {
 		for(j=0,k=nos.length; j<k; j++) {
 			cards.push(suits[i]+nos[j]);
@@ -197,6 +201,6 @@ var startGame = function(roomId) {
 	river = cards.pop();
 	//First Round of Betting
 	for(i=0,l=players.length; i<l ; i++) {
-		//currPlayer = players[i];
+		//currPlayer[roomId] = players[i];
 	}
 }

@@ -1,3 +1,5 @@
+//TODO: deny client side changes to chips
+
 var startingChipCount = 500000;
 var maxUsers = 9;
 
@@ -6,9 +8,11 @@ Accounts.config({
 });
 
 Accounts.onCreateUser(function(options, user) {
-	user.chips = startingChipCount;
 	if (options.profile)
     	user.profile = options.profile;
+    if(!user.profile)
+    	user.profile = {};
+    user.profile.chips = startingChipCount;
     return user;
 });
 
@@ -65,7 +69,7 @@ Meteor.publish('roomByName', function(roomName){
 	    	if(room.started) {
 	    		if(room.users && room.users.length) {
 		    		if(room.users.indexOf(userId) === -1 && room.queue && room.users.length + room.queue.length <= maxUsers) {
-		    			if(users.indexOf(userId) === -1) {
+		    			if(room.users.indexOf(userId) === -1) {
 				    		Rooms.update({
 						        _id: room._id,
 						    }, {

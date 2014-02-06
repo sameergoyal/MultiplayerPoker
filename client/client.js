@@ -114,5 +114,5 @@ Template.game.sessionGet = function(key) {
 }
 
 Template.game.chipCount = function() {
-    return Meteor.user().chips;
+    return Meteor.user().profile.chips;
 }

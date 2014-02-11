@@ -28,6 +28,11 @@ Router.map(function () {
                 Session.set('myCards',message);
             };
             PlayerCardStream.on(Meteor.userId(), playerCardHandler);
+            var room = this.getData();
+            var moveHandler = function(message) {
+                
+            }
+            CurrPlayerStream.on(room._id, moveHandler);
         },
     });
 });

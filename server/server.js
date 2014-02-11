@@ -2,6 +2,7 @@
 
 var startingChipCount = 500000;
 var maxUsers = 9;
+var timeoutDelay = 120000;
 
 Accounts.config({
 	sendVerificationEmail: true,
@@ -16,7 +17,10 @@ Accounts.onCreateUser(function(options, user) {
     return user;
 });
 
+//Game State Variables
+var round = {};
 var currPlayer = {};
+var timer = {};
 
 PlayerCardStream.permissions.read(function(eventName) {
 	return this.userId === eventName;
@@ -34,8 +38,16 @@ TableCardStream.permissions.write(function(eventName) {
 	return false;
 });
 
-MovesStream.permissions.read(function(eventName) {
+CurrPlayerStream.permissions.read(function(eventName) {
 	return true;
+});
+
+CurrPlayerStream.permissions.write(function(eventName) {
+	return false;
+});
+
+MovesStream.permissions.read(function(eventName) {
+	return false;
 });
 
 MovesStream.permissions.write(function(eventName) {
@@ -43,6 +55,16 @@ MovesStream.permissions.write(function(eventName) {
 		return true;
 	}
 }, false);
+
+var RoomController = function (roomId, action) {
+	if(action === '') {
+		
+	}
+}
+
+MovesStream.addFilter(function(eventName, args) {
+
+});
 
 Meteor.publish('roomByName', function(roomName){
 	var self = this;
@@ -204,7 +226,10 @@ var startGame = function(roomId) {
 	cards.pop();	//Burn
 	river = cards.pop();
 	//First Round of Betting
-	for(i=0,l=players.length; i<l ; i++) {
-		//currPlayer[roomId] = players[i];
-	}
+	CurrPlayerStream.emit(roomId, {player: 0, delay: timeoutDelay});
+	round[roomId] = 0;
+	currPlayer[roomId] = 0;
+	timer[roomId] = Meteor.setTimeout(function () {
+		RoomController(roomId, "drop");
+	}, timeoutDelay);
 }

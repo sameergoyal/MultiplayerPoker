@@ -18,7 +18,7 @@ Router.map(function () {
     this.route('room',{
         path: 'room/:name',
         template: 'room',
-        waitOn: function() { return [Meteor.subscribe('roomByName', this.params.name), Meteor.subscribe('usersByName', this.params.name)] },
+        waitOn: function() { return Meteor.subscribe('roomByName', this.params.name) },
         data: function() {
             return Rooms.findOne({name:this.params.name});
         },
@@ -32,7 +32,9 @@ Router.map(function () {
             var moveHandler = function(message) {
                 
             }
-            CurrPlayerStream.on(room._id, moveHandler);
+            if(room) {
+                CurrPlayerStream.on(room._id, moveHandler);
+            }
         },
     });
 });

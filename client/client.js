@@ -23,17 +23,31 @@ Router.map(function () {
             return Rooms.findOne({name:this.params.name});
         },
         before: function() {
-            var playerCardHandler = function(message) { 
+            var playerCardHandler = function(message) {
                 console.log('Cards dealt!');
                 Session.set('myCards',message);
             };
-            PlayerCardStream.on(Meteor.userId(), playerCardHandler);
-            var room = this.getData();
-            var moveHandler = function(message) {
-                
+            var timer = function(){
+                var timeout = Session.get('timeout');
+                if(timeout > 0) {
+                    Session.set('timeout', timeout - 1); 
+                    Meteor.setTimeout(timer,1000);
+                }
             }
-            if(room) {
-                CurrPlayerStream.on(room._id, moveHandler);
+            var moveHandler = function(message) {
+                console.log('Current player is : ' + message.player);
+                Session.set('currPlayer',message.player);
+                Session.set('timeout',message.delay/1000);
+                Meteor.setTimeout(timer,1000);
+            }
+            PlayerCardStream.on(Meteor.userId(), playerCardHandler);
+            CurrPlayerStream.on(this.params.name, moveHandler);
+            var room = Rooms.findOne({name:this.params.name});
+            
+            if(room && room.users)
+            {
+                var users = room.users;
+                Session.set('users',users);
             }
         },
     });
@@ -44,6 +58,7 @@ Router.before(function(){isLoggedInUser('login');}, { except:['home','login'] })
 function isLoggedInUser(routeName, routeParams) {
     Deps.autorun(function(){
         if(!Meteor.userId()) {
+            // TODO: change to .stop & .render
             Router.go(routeName, routeParams);
         }
     });
@@ -113,7 +128,7 @@ Template.game.playersInfo = function(players) {
     for(var i=0,l=players.length; i<l; i++) {
         result.push({userId: players[i]});
     }
-    return result
+    return result;
 }
 
 Template.game.sessionGet = function(key) {
@@ -122,4 +137,8 @@ Template.game.sessionGet = function(key) {
 
 Template.game.chipCount = function() {
     return Meteor.user().profile.chips;
+}
+
+Template.game.isCurrPlayer = function(index) {
+    return index === Session.get('currPlayer');
 }

@@ -56,7 +56,7 @@ MovesStream.permissions.write(function(eventName) {
 	}
 }, false);
 
-var RoomController = function (roomId, action) {
+var RoomController = function (roomName, action) {
 	if(action === '') {
 		
 	}
@@ -80,6 +80,7 @@ Meteor.publish('roomByName', function(roomName){
 	    		started: false,
 	    		queue: [],
 	    		players: [],
+	    		playerInfo: [],
 	    	},function(error, result){
 		        if(error) {
 		            console.log('Error is '+error);
@@ -91,7 +92,7 @@ Meteor.publish('roomByName', function(roomName){
 	    	if(room.started) {
 	    		if(room.users && room.users.length) {
 		    		if(room.users.indexOf(userId) === -1 && room.queue && room.users.length + room.queue.length <= maxUsers) {
-		    			if(room.users.indexOf(userId) === -1) {
+		    			if(room.queue.indexOf(userId) === -1) {
 				    		Rooms.update({
 						        _id: room._id,
 						    }, {
@@ -187,17 +188,27 @@ var startGame = function(roomId) {
 	}
 	cards.sort(function() { return 0.5 - Math.random() });
 	var room = Rooms.findOne(roomId);
+	var roomName = room.name;
 	var users = room.users;
 	var players = [];
+	var playerInfo = [];
 	for(i=0,l=users.length; i<l ; i++) {
 		if(players.indexOf(users[i]) === -1) {
 			players.push(users[i]);
+			var user = Meteor.users.findOne(users[i]);
+			playerInfo.push({
+				index: i,
+				userId: users[i],
+				username: user.username,
+				chipCount: user.profile.chips,
+			});
 		}
 	}
 	Rooms.update({
         _id: roomId, 
     }, {
         $set: {players: players },
+        $set: {playerInfo: playerInfo },
     }, function(error, result){
         if(error) {
             console.log('Error is '+error);
@@ -226,10 +237,10 @@ var startGame = function(roomId) {
 	cards.pop();	//Burn
 	river = cards.pop();
 	//First Round of Betting
-	CurrPlayerStream.emit(roomId, {player: 0, delay: timeoutDelay});
-	round[roomId] = 0;
-	currPlayer[roomId] = 0;
-	timer[roomId] = Meteor.setTimeout(function () {
-		RoomController(roomId, "drop");
+	CurrPlayerStream.emit(roomName, {player: 0, delay: timeoutDelay});
+	round[roomName] = 0;
+	currPlayer[roomName] = 0;
+	timer[roomName] = Meteor.setTimeout(function () {
+		RoomController(roomName, "drop");
 	}, timeoutDelay);
 }
